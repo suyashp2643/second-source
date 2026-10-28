@@ -2,7 +2,7 @@
 
 ## What is ready
 
-`npm run build:pages` creates `pages-dist` with the browser app, simulator static asset, API `_worker.js`, security headers and API-only function routing. The API Worker is approximately 6 KiB compressed; the roughly 20 MB simulator file stays below Pages' 25 MiB per-asset limit. No ChatGPT-hosted runtime is required.
+`npm run build:pages` creates `pages-dist` with the browser app, simulator static asset, API `_worker.js`, security headers and API-only function routing. The API Worker is approximately 6 KiB compressed; the simulator JavaScript (about 4 MB) and WebAssembly (about 6 MB) remain separate static files below Pages' 25 MiB per-asset limit. The build externalizes the package's embedded WASM URLs instead of allowing `data:` network access in the content policy. No ChatGPT-hosted runtime is required.
 
 ## Git-based deployment
 

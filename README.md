@@ -21,7 +21,7 @@ npm run build
 npm run dev
 ```
 
-Open http://localhost:3000. The default offline baseline needs no key. The simulator is downloaded from the same server, with no simulator CDN dependency. First load transfers approximately 5.7 MB compressed.
+Open http://localhost:3000. The default offline baseline needs no key. The simulator is downloaded from the same server, with no simulator CDN dependency. The Pages build serves the simulator JavaScript and WebAssembly as separate same-origin assets so its content policy can stay restricted.
 
 For local live inference, click **Connect Nemotron**, select live mode and enter a session-only key. Shared server-key mode requires an access code and a D1 quota binding; see `docs/CLOUDFLARE.md`. The key is kept in page memory and sent over the same-origin proxy; it is excluded from exported evidence and browser storage. Use HTTPS when serving beyond localhost.
 
