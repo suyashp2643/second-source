@@ -1,0 +1,21 @@
+{
+  "name": "second-source",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "build": "bash scripts/build.sh",
+    "validate": "node scripts/validate-artifact.mjs",
+    "dev": "node --env-file-if-exists=.env scripts/dev.mjs",
+    "test": "npm run build:pages && npm run build && node --test tests/*.test.mjs",
+    "build:pages": "node scripts/build-pages.mjs",
+    "dev:pages": "npx wrangler pages dev pages-dist",
+    "deploy:pages": "npx wrangler pages deploy pages-dist --project-name second-source",
+    "check:reference": "node scripts/reference-check.mjs"
+  },
+  "version": "1.1.0",
+  "description": "Evidence-driven LDO replacement with Nemotron and live ngspice",
+  "license": "MIT",
+  "dependencies": {
+    "eecircuit-engine": "1.9.0"
+  }
+}

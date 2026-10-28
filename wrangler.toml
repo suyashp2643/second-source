@@ -1,0 +1,13 @@
+name = "second-source"
+compatibility_date = "2026-10-28"
+pages_build_output_dir = "./pages-dist"
+
+[vars]
+NEBIUS_MODEL = "nvidia/nemotron-3-super-120b-a12b"
+DAILY_CALL_LIMIT = "100"
+
+# Optional for shared-key demo mode. Fill the ID after creating the database.
+# [[d1_databases]]
+# binding = "BUDGET_DB"
+# database_name = "second-source-budget"
+# database_id = "YOUR_DATABASE_ID"

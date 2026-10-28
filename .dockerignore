@@ -1,0 +1,7 @@
+.git
+.env
+.env.*
+*.tgz
+*.tar.gz
+dist
+vendor/ngspice

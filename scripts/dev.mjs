@@ -1,0 +1,4 @@
+import http from 'node:http';import fs from 'node:fs';import {pathToFileURL} from 'node:url';
+const mod=await import(pathToFileURL(process.cwd()+'/dist/server/index.js').href);
+const server=http.createServer(async(req,res)=>{try{let body='';for await(const x of req){body+=x;if(body.length>100000)throw Error('Request too large')};const request=new Request('http://'+req.headers.host+req.url,{method:req.method,headers:req.headers,...(body?{body}: {})});const response=await mod.default.fetch(request,process.env);res.writeHead(response.status,Object.fromEntries(response.headers));res.end(Buffer.from(await response.arrayBuffer()))}catch(e){res.writeHead(500);res.end(e.message)}});
+server.listen(Number(process.env.PORT||(process.argv.includes('--port')?process.argv[process.argv.indexOf('--port')+1]:3000)),'0.0.0.0',()=>console.log('Second Source development server ready'));

@@ -1,0 +1,16 @@
+dist/
+site.tar.gz
+
+*.tgz
+.env
+.env.*
+!.env.example
+vendor/ngspice/
+*.tar.gz
+
+node_modules/
+pages-dist/
+.wrangler/
+.dev.vars
+reference-models/
+vendor/eecircuit/

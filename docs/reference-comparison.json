@@ -1,0 +1,98 @@
+{
+  "generatedAt": "2026-10-28T06:33:10.797Z",
+  "source": "https://www.ti.com/lit/zip/snom488",
+  "model": "LM1117_N_3P3_TRANS, TI Final 1.1, 17MAR2015",
+  "originalModelSha256": "e25b9813941ecfedfc2f5b6a5c6e7e172aa705b6a8e1d18976810dab3121c740",
+  "adapter": [
+    "PSpice TABLE to equivalent piecewise-linear expression at the four supplied points",
+    "PSpice VSWITCH to ngspice SW with Vt=0.5 and Vh=-0.5",
+    "Zero temperature-coefficient syntax removed; IF defined as ternary"
+  ],
+  "acceptance": {
+    "scope": "DC load plateau only, six listed input/load conditions with 100 µF output capacitor",
+    "absolutePlateauToleranceV": 0.1,
+    "maximumObservedErrorV": 0.040201916298840956,
+    "pass": true
+  },
+  "comparisons": [
+    {
+      "vin": 3.8,
+      "loadMa": 100,
+      "capUf": 100,
+      "referencePlateauV": 2.697185958663109,
+      "approximationPlateauV": 2.691999784640045,
+      "absolutePlateauErrorV": 0.005186174023064094,
+      "referenceMinV": 2.6971855787154664,
+      "approximationMinV": 2.68706650293835,
+      "referenceMaxV": 2.758979527490891,
+      "approximationMaxV": 2.702612127630211
+    },
+    {
+      "vin": 3.8,
+      "loadMa": 400,
+      "capUf": 100,
+      "referencePlateauV": 2.658158886089499,
+      "approximationPlateauV": 2.6379997889599873,
+      "absolutePlateauErrorV": 0.020159097129511583,
+      "referenceMinV": 2.652702694224519,
+      "approximationMinV": 2.608380084293243,
+      "referenceMaxV": 2.7589800329943004,
+      "approximationMaxV": 2.7456683369327477
+    },
+    {
+      "vin": 3.8,
+      "loadMa": 800,
+      "capUf": 100,
+      "referencePlateauV": 2.596125138020759,
+      "approximationPlateauV": 2.5559997955200755,
+      "absolutePlateauErrorV": 0.04012534250068356,
+      "referenceMinV": 2.588877986408612,
+      "approximationMinV": 2.4718212690082044,
+      "referenceMaxV": 2.758980923700471,
+      "approximationMaxV": 2.8124170223574056
+    },
+    {
+      "vin": 5,
+      "loadMa": 100,
+      "capUf": 100,
+      "referencePlateauV": 3.297276726012774,
+      "approximationPlateauV": 3.291999736640032,
+      "absolutePlateauErrorV": 0.005276989372741792,
+      "referenceMinV": 3.2931958285873075,
+      "approximationMinV": 3.2870664549383513,
+      "referenceMaxV": 3.303159247257097,
+      "approximationMaxV": 3.302612032028485
+    },
+    {
+      "vin": 5,
+      "loadMa": 400,
+      "capUf": 100,
+      "referencePlateauV": 3.2882445537747946,
+      "approximationPlateauV": 3.2679997385600092,
+      "absolutePlateauErrorV": 0.020244815214785383,
+      "referenceMinV": 3.2637798099785567,
+      "approximationMinV": 3.238380033151172,
+      "referenceMaxV": 3.3235650459609296,
+      "approximationMaxV": 3.3756679433287937
+    },
+    {
+      "vin": 5,
+      "loadMa": 800,
+      "capUf": 100,
+      "referencePlateauV": 3.2762016574189032,
+      "approximationPlateauV": 3.2359997411200623,
+      "absolutePlateauErrorV": 0.040201916298840956,
+      "referenceMinV": 3.2246021648920227,
+      "approximationMinV": 3.1518211292869425,
+      "referenceMaxV": 3.35073209295527,
+      "approximationMaxV": 3.4924164191356146
+    }
+  ],
+  "limitations": [
+    "Reference is an adapted manufacturer simulation model, not physical hardware",
+    "This check covers only LM1117 at the listed conditions; other candidates remain unvalidated behavioral models",
+    "Transient minima and maxima are reported but not claimed to match",
+    "Default dynamics sweep tests sensitivity to assumptions, not manufacturing distributions",
+    "No manufacturer endorsement or hardware qualification"
+  ]
+}
