@@ -2,6 +2,8 @@
 
 **A replacement is a hypothesis. Test it.**
 
+[Live demo on Cloudflare Pages](https://second-source.pages.dev/) · [Deployment guide](docs/CLOUDFLARE.md)
+
 An interactive 3.3 V regulator replacement workbench for the Nebius × NVIDIA Global AI Hackathon, Best Apps and Agents track. NVIDIA Nemotron proposes experiments using the Nebius Token Factory inference API. Genuine ngspice runs in a browser Web Worker; fixed evaluator code determines pass/fail from measured traces and catalog limits.
 
 ## Current status
@@ -9,7 +11,7 @@ An interactive 3.3 V regulator replacement workbench for the Nebius × NVIDIA Gl
 - Working offline baseline: fully runnable, explicitly labeled deterministic, with no language model calls.
 - Live Nemotron integration: implemented with proposal validation, iterative feedback and explicit API errors. Requires a valid Nebius API key. **A live provider call has not yet been verified in this workspace because no key was available.**
 - Three curated 3.3 V candidates, up to nine SPICE tests per experiment with the default control-assumption sweep, load-step transient simulation, thermal estimate, source-linked catalog cards, exportable evidence.
-- Public source: https://github.com/suyashp2643/second-source. Cloudflare Pages + Functions packaging is ready; account deployment still needs authenticated access. A YouTube demo has not been recorded. See `docs/CLOUDFLARE.md`.
+- Public source: https://github.com/suyashp2643/second-source. Cloudflare Pages deployment is live; offline investigation and evidence export have been verified. Live Nebius inference still requires a key. A YouTube demo has not been recorded. See `docs/CLOUDFLARE.md`.
 
 ## Run locally
 

@@ -33,3 +33,5 @@ test('assumption sweep exposes the fragile repair and accepts a larger modeled c
  const fragile=await runProposal(FULL_DEFAULTS,{component:'AP2112K-3.3',cap:100});assert.equal(fragile.corners.length,9);assert.equal(fragile.evaluation.pass,false);
  const stronger=await runProposal(FULL_DEFAULTS,{component:'AP2112K-3.3',cap:220});assert.equal(stronger.corners.length,9);assert.equal(stronger.evaluation.pass,true);assert.deepEqual([...new Set(stronger.corners.map(c=>c.profile))],['fast','nominal','slow']);
 });
+
+test('overloaded pass element cannot boost the output above its input',async()=>{const result=await runProposal({...FULL_DEFAULTS,load:720},{component:'AP2112K-3.3',cap:10});assert.equal(result.evaluation.pass,false);for(const corner of result.corners)assert(corner.max<=corner.vin+0.001,`${corner.profile}: ${corner.max} V exceeds ${corner.vin} V input`)});
