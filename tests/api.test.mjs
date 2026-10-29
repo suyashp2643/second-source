@@ -12,3 +12,14 @@ test('mocked Nebius contract preserves model and usage, validates proposals',asy
 });
 test('provider errors never trigger silent offline fallback',async()=>{const old=globalThis.fetch;globalThis.fetch=async()=>new Response('',{status:401});try{const response=await app.fetch(request({requirements:DEFAULTS,apiKey:'test-placeholder-not-a-real-key'}),{});assert.equal(response.status,502);const data=await response.json();assert(data.error.includes('401'));assert.equal(data.proposal,undefined)}finally{globalThis.fetch=old}});
 test('assets and evidence hashing work',async()=>{const response=await app.fetch(new Request('https://second-source.test/'));assert.equal(response.status,200);assert.equal(response.headers.get('content-type'),'text/html; charset=utf-8');const hash=await app.fetch(new Request('https://second-source.test/api/hash',{method:'POST',body:'abc'}));assert.equal((await hash.json()).hash,'ba7816bf8f01cfea414140de5dae2223b00361a396177a9cb410ff61f20015ad')});
+
+test('current screening excludes under-rated parts and blocks an invalid model proposal',async()=>{
+ const old=globalThis.fetch;let payload;
+ globalThis.fetch=async(url,init)=>{payload=JSON.parse(JSON.parse(init.body).messages[1].content);return Response.json({choices:[{message:{content:JSON.stringify({component:'MCP1700-3302',cap:10,reason:'Unsuitable mocked proposal'})}}]})};
+ try{
+  const response=await app.fetch(request({requirements:{...DEFAULTS,load:800},apiKey:'test-placeholder-not-a-real-key'}),{});
+  assert.equal(response.status,400);assert.match((await response.json()).error,/blocked before simulation/);
+  assert.deepEqual(payload.catalog.map(c=>c.id),['LM1117-3.3']);
+  const ap=payload.excludedCatalogScreening.find(c=>c.component==='AP2112K-3.3');assert.equal(ap.eligible,false);assert(ap.regulatedThermalEstimateC>125);
+ }finally{globalThis.fetch=old}
+});
