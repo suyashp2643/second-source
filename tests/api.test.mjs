@@ -6,7 +6,7 @@ test('cross-origin inference request is rejected',async()=>{const response=await
 test('mocked Nebius contract preserves model and usage, validates proposals',async()=>{
  const old=globalThis.fetch;let captured;
  globalThis.fetch=async(url,init)=>{captured={url,body:JSON.parse(init.body)};return Response.json({id:'mock-request-id',choices:[{message:{content:JSON.stringify({component:'AP2112K-3.3',cap:100,reason:'Test larger capacitance after measured rail failure.',pass:true})}}],usage:{prompt_tokens:100,completion_tokens:30}})};
- try{const response=await app.fetch(request({requirements:DEFAULTS,apiKey:'test-placeholder-not-a-real-key'}),{});assert.equal(response.status,200);const data=await response.json();assert.equal(data.proposal.cap,100);assert.equal(data.proposal.pass,undefined);assert.equal(data.usage.completion_tokens,30);assert.equal(captured.url,'https://api.tokenfactory.us-central1.nebius.com/v1/chat/completions');assert(captured.body.model.includes('nemotron'));assert(captured.body.messages[0].content.includes('cannot declare pass/fail'));
+ try{const response=await app.fetch(request({requirements:DEFAULTS,apiKey:'test-placeholder-not-a-real-key'}),{});assert.equal(response.status,200);const data=await response.json();assert.equal(data.proposal.cap,100);assert.equal(data.proposal.pass,undefined);assert.equal(data.usage.completion_tokens,30);assert.equal(captured.url,'https://api.tokenfactory.us-central1.nebius.com/v1/chat/completions');assert(captured.body.model.includes('nemotron'));assert.equal(JSON.parse(captured.body.messages[1].content).searchBudget.remainingReplacementProposals,6);assert(captured.body.messages[0].content.includes('cannot declare pass/fail'));
  const locked=await app.fetch(request({requirements:{...DEFAULTS,allowCap:false},apiKey:'test-placeholder-not-a-real-key'}),{});assert.equal(locked.status,400);assert((await locked.json()).error.includes('locked'));
  }finally{globalThis.fetch=old}
 });
@@ -32,4 +32,10 @@ test('agent stop preserves provider provenance without fabricating a proposal',a
   assert.equal(response.status,200);const data=await response.json();
   assert.equal(data.stop,true);assert.equal(data.provider,'Nebius Token Factory');assert.equal(data.requestId,'header-stop-id');assert.equal(data.usage.completion_tokens,40);assert.match(data.model,/nemotron/);assert.match(data.reason,/thermal/);assert.equal(data.proposal,undefined);
  }finally{globalThis.fetch=old}
+});
+
+test('planner receives the final remaining experiment budget',async()=>{
+ const old=globalThis.fetch;let budget;
+ globalThis.fetch=async(url,init)=>{budget=JSON.parse(JSON.parse(init.body).messages[1].content).searchBudget;return Response.json({choices:[{message:{content:JSON.stringify({stop:true,reason:'Test stop'})}}]})};
+ try{await app.fetch(request({requirements:DEFAULTS,apiKey:'test-placeholder-not-a-real-key',history:Array.from({length:6},()=>({proposal:{component:'AP2112K-3.3',cap:10},evaluation:{pass:false}}))}),{});assert.equal(budget.remainingReplacementProposals,1)}finally{globalThis.fetch=old}
 });

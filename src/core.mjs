@@ -74,3 +74,12 @@ export function recommendation(history,r){
  passing.sort((a,b)=>r.objective==='margin'?b.evaluation.headroom-a.evaluation.headroom:a.proposal.cap-b.proposal.cap);
  return passing[0]??null;
 }
+
+export const MAX_REPLACEMENT_PROPOSALS=6;
+export function searchBudget(history){
+ const used=history.filter(h=>h.metadata?.role==='replacement'||h.role==='replacement').length;
+ return {maxReplacementProposals:MAX_REPLACEMENT_PROPOSALS,usedReplacementProposals:used,remainingReplacementProposals:Math.max(0,MAX_REPLACEMENT_PROPOSALS-used)};
+}
+export function searchOutcome(found,agentStop,baselineExhausted){
+ return found?'replacement_found':agentStop?'agent_stopped':baselineExhausted?'baseline_exhausted':'search_budget_exhausted';
+}

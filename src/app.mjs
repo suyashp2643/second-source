@@ -1,4 +1,4 @@
-import {CATALOG,DEFAULTS,validateRequirements,offlineProposal,recommendation} from '/src/core.mjs?v=1';
+import {CATALOG,DEFAULTS,MAX_REPLACEMENT_PROPOSALS,searchBudget,searchOutcome,validateRequirements,offlineProposal,recommendation} from '/src/core.mjs?v=1';
 const $=s=>document.querySelector(s), $$=s=>[...document.querySelectorAll(s)];
 const uuid=()=>{const b=crypto.getRandomValues(new Uint8Array(16));b[6]=(b[6]&15)|64;b[8]=(b[8]&63)|128;const h=[...b].map(x=>x.toString(16).padStart(2,'0')).join('');return h.slice(0,8)+'-'+h.slice(8,12)+'-'+h.slice(12,16)+'-'+h.slice(16,20)+'-'+h.slice(20)};
 const escape=s=>String(s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
@@ -26,7 +26,7 @@ function simulate(requirements,proposal,token){
   instance.postMessage({id,requirements,proposal});
  })
 }
-async function askAgent(r,history){controller=new AbortController();const res=await fetch('/api/plan',{method:'POST',headers:{'content-type':'application/json',...(demoAccess?{'x-demo-access':demoAccess}:{})},body:JSON.stringify({requirements:r,history:history.map(h=>({proposal:h.proposal,evaluation:h.evaluation})),apiKey:apiKey||undefined,model}),signal:controller.signal});const data=await res.json();if(!res.ok)throw Error(data.error||'Agent request failed.');return data}
+async function askAgent(r,history){controller=new AbortController();const res=await fetch('/api/plan',{method:'POST',headers:{'content-type':'application/json',...(demoAccess?{'x-demo-access':demoAccess}:{})},body:JSON.stringify({requirements:r,history:history.map(h=>({proposal:h.proposal,evaluation:h.evaluation})),apiKey:apiKey||undefined,model,searchBudget:searchBudget(history)}),signal:controller.signal});const data=await res.json();if(!res.ok)throw Error(data.error||'Agent request failed.');return data}
 async function testProposal(p,token,metadata={}){
  const proposalRecord={proposal:{...p},proposedAt:new Date().toISOString(),...metadata};run.proposals.push(proposalRecord); // Persist proposal before invoking SPICE.
  $('#svgpart').textContent=p.component;$('#svgcap').textContent=p.cap+' µF';$('#candidate-label').textContent=`Testing ${p.component} · ${p.cap} µF output capacitor`;
@@ -45,17 +45,17 @@ $('#requirements').onsubmit=async e=>{e.preventDefault();if(busy)return;if(!e.ta
  try{
  const baseline=await testProposal({component:'LM1117-3.3',cap:r.cap,reason:'Original circuit, evaluated before any replacement proposal.'},token,{role:'original'});
  if(baseline.evaluation.pass){run.status='completed';log('Original meets the implemented checks','A replacement may still be investigated because of sourcing needs. No availability is assumed.','passlog')}
- let replacementFound=false;
- for(let attempt=0;attempt<6;attempt++){
+ let replacementFound=false,baselineExhausted=false;run.searchBudget=searchBudget(run.experiments);
+ for(let attempt=0;attempt<MAX_REPLACEMENT_PROPOSALS;attempt++){
   if(token!==generation)throw Error('Investigation stopped.');$('#activitystate').textContent=mode==='live'?'NEMOTRON THINKING':'BASELINE SELECTING';
   let p,metadata={};
   if(mode==='live'){log('Nemotron is choosing the next experiment',`Sending constraints and ${run.experiments.length} measured result(s) to Nebius Token Factory.`);const response=await askAgent(r,run.experiments);if(response.stop){run.agentStop={reason:response.reason,receivedAt:new Date().toISOString(),provider:response.provider,model:response.model,usage:response.usage,requestId:response.requestId};log('Agent stopped searching',response.reason);break}p=response.proposal;metadata={role:'replacement',provider:response.provider,model:response.model,usage:response.usage,requestId:response.requestId}}
-  else{p=offlineProposal(r,run.experiments);metadata={role:'replacement',provider:'Deterministic offline baseline'};if(!p){log('No further experiments selected','Remaining combinations are excluded by existing constraint failures or change permissions.');break}}
+  else{p=offlineProposal(r,run.experiments);metadata={role:'replacement',provider:'Deterministic offline baseline'};if(!p){baselineExhausted=true;log('No further experiments selected','Remaining combinations are excluded by existing constraint failures or change permissions.');break}}
   const result=await testProposal(p,token,metadata);if(result.evaluation.pass){replacementFound=true;break}
  }
- if(token!==generation)return;const best=recommendation(run.experiments.filter(x=>x.metadata.role!=='original'),r);selected=best||run.experiments.at(-1);run.status='completed';run.finishedAt=new Date().toISOString();run.outcome=replacementFound?'replacement_found':'no_passing_replacement_in_tested_candidates';
- log(replacementFound?'Replacement passes the modeled checks':'No passing replacement found in this search',replacementFound?'Review package adaptation, model assumptions and physical validation before using it.':`Search bounded to six replacement proposals. ${run.experiments.length} total experiments retained. This is not proof that no possible design exists.`,replacementFound?'passlog':'faillog');
- renderResult(selected);$('#activitystate').textContent='INVESTIGATION COMPLETE';toast(replacementFound?'Investigation complete. Evidence is ready to inspect.':'Search complete. No tested replacement passed every check.');
+ if(token!==generation)return;const best=recommendation(run.experiments.filter(x=>x.metadata.role!=='original'),r);selected=best||run.experiments.at(-1);run.status='completed';run.finishedAt=new Date().toISOString();run.searchBudget=searchBudget(run.experiments);run.outcome=searchOutcome(replacementFound,run.agentStop,baselineExhausted);
+ const ending=run.outcome==='search_budget_exhausted'?'Search budget exhausted':run.outcome==='agent_stopped'?'Agent ended the search':'Baseline search exhausted';log(replacementFound?'Replacement passes the modeled checks':ending,replacementFound?'Review package adaptation, model assumptions and physical validation before using it.':`${run.agentStop?.reason||''} ${run.searchBudget.usedReplacementProposals}/${MAX_REPLACEMENT_PROPOSALS} replacement proposals tested. No tested replacement passed; this does not prove that no viable design exists.`,replacementFound?'passlog':'faillog');
+ renderResult(selected);$('#activitystate').textContent=run.outcome==='search_budget_exhausted'?'SEARCH BUDGET EXHAUSTED':run.outcome==='agent_stopped'?'AGENT STOPPED':'INVESTIGATION COMPLETE';toast(replacementFound?'Investigation complete. Evidence is ready to inspect.':'Search complete. No tested replacement passed every check.');
  }catch(err){if(token!==generation)return;run.status='error';run.error=err.message;log('Investigation paused',err.message,'faillog');$('#activitystate').textContent='ERROR · EVIDENCE RETAINED';toast(err.message)}finally{if(token===generation){setBusy(false);renderEvidence()}}
 };
 $('#stop').onclick=()=>{generation++;controller?.abort();cancelSimulation?.();worker?.terminate();worker=null;if(run){run.status='stopped';run.finishedAt=new Date().toISOString()}setBusy(false);log('Investigation stopped','Completed experiments are preserved. The in-progress proposal has no assigned verdict.');$('#activitystate').textContent='STOPPED';$('#circuitstatus').textContent='STOPPED';$('#circuitstatus').className='pill neutral';renderEvidence()};
