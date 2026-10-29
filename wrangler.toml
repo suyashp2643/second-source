@@ -4,7 +4,7 @@ pages_build_output_dir = "./pages-dist"
 
 [vars]
 NEBIUS_MODEL = "nvidia/nemotron-3-super-120b-a12b"
-DAILY_CALL_LIMIT = "100"
+DAILY_CALL_LIMIT = "50"
 
 # Optional for shared-key demo mode. Fill the ID after creating the database.
 # [[d1_databases]]
