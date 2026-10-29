@@ -27,7 +27,7 @@ export default {async fetch(req,env={}){
    if(typeof content!=='string')throw Error('The model returned no usable proposal.');
    content=content.replace(/<think>[\s\S]*?<\/think>/g,'').trim().replace(/^```(?:json)?\s*/,'').replace(/\s*```$/,'');
    let p;try{p=JSON.parse(content)}catch{throw Error('The model did not return valid proposal JSON. Try another run.');}
-   if(p.stop===true)return json({stop:true,reason:String(p.reason).slice(0,1500),model,usage:data.usage});
+   if(p.stop===true)return json({stop:true,reason:String(p.reason).slice(0,1500),model,usage:data.usage,provider:'Nebius Token Factory',requestId:res.headers.get('x-request-id')||data.id});
    p=validateProposal(p,r);if(!eligibleCatalog.some(c=>c.id===p.component))throw Error(`The model proposed ${p.component} below the required ${r.load} mA current rating. Proposal blocked before simulation; no verdict assigned.`);if(history.some(h=>h.proposal.component===p.component&&h.proposal.cap===p.cap))throw Error('The model repeated a tested proposal. Try again or change requirements.');
    return json({proposal:p,model,usage:data.usage,provider:'Nebius Token Factory',requestId:res.headers.get('x-request-id')||data.id});
   }catch(e){return json({error:e.name==='TimeoutError'?'Nebius request timed out. No result was fabricated.':e.message},400)}

@@ -23,3 +23,13 @@ test('current screening excludes under-rated parts and blocks an invalid model p
   const ap=payload.excludedCatalogScreening.find(c=>c.component==='AP2112K-3.3');assert.equal(ap.eligible,false);assert(ap.regulatedThermalEstimateC>125);
  }finally{globalThis.fetch=old}
 });
+
+test('agent stop preserves provider provenance without fabricating a proposal',async()=>{
+ const old=globalThis.fetch;
+ globalThis.fetch=async()=>Response.json({id:'provider-stop-id',choices:[{message:{content:JSON.stringify({stop:true,reason:'Current and thermal constraints exhaust the catalog.'})}}],usage:{prompt_tokens:120,completion_tokens:40}},{headers:{'x-request-id':'header-stop-id'}});
+ try{
+  const response=await app.fetch(request({requirements:{...DEFAULTS,load:800},apiKey:'test-placeholder-not-a-real-key'}),{});
+  assert.equal(response.status,200);const data=await response.json();
+  assert.equal(data.stop,true);assert.equal(data.provider,'Nebius Token Factory');assert.equal(data.requestId,'header-stop-id');assert.equal(data.usage.completion_tokens,40);assert.match(data.model,/nemotron/);assert.match(data.reason,/thermal/);assert.equal(data.proposal,undefined);
+ }finally{globalThis.fetch=old}
+});

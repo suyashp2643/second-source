@@ -49,7 +49,7 @@ $('#requirements').onsubmit=async e=>{e.preventDefault();if(busy)return;if(!e.ta
  for(let attempt=0;attempt<6;attempt++){
   if(token!==generation)throw Error('Investigation stopped.');$('#activitystate').textContent=mode==='live'?'NEMOTRON THINKING':'BASELINE SELECTING';
   let p,metadata={};
-  if(mode==='live'){log('Nemotron is choosing the next experiment',`Sending constraints and ${run.experiments.length} measured result(s) to Nebius Token Factory.`);const response=await askAgent(r,run.experiments);if(response.stop){log('Agent stopped searching',response.reason);break}p=response.proposal;metadata={role:'replacement',provider:response.provider,model:response.model,usage:response.usage,requestId:response.requestId}}
+  if(mode==='live'){log('Nemotron is choosing the next experiment',`Sending constraints and ${run.experiments.length} measured result(s) to Nebius Token Factory.`);const response=await askAgent(r,run.experiments);if(response.stop){run.agentStop={reason:response.reason,receivedAt:new Date().toISOString(),provider:response.provider,model:response.model,usage:response.usage,requestId:response.requestId};log('Agent stopped searching',response.reason);break}p=response.proposal;metadata={role:'replacement',provider:response.provider,model:response.model,usage:response.usage,requestId:response.requestId}}
   else{p=offlineProposal(r,run.experiments);metadata={role:'replacement',provider:'Deterministic offline baseline'};if(!p){log('No further experiments selected','Remaining combinations are excluded by existing constraint failures or change permissions.');break}}
   const result=await testProposal(p,token,metadata);if(result.evaluation.pass){replacementFound=true;break}
  }
