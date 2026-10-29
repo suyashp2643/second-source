@@ -6,8 +6,7 @@ pages_build_output_dir = "./pages-dist"
 NEBIUS_MODEL = "nvidia/nemotron-3-super-120b-a12b"
 DAILY_CALL_LIMIT = "50"
 
-# Optional for shared-key demo mode. Fill the ID after creating the database.
-# [[d1_databases]]
-# binding = "BUDGET_DB"
-# database_name = "second-source-budget"
-# database_id = "YOUR_DATABASE_ID"
+[[d1_databases]]
+binding = "BUDGET_DB"
+database_name = "second-source-budget"
+database_id = "644946f0-9dbe-46e3-857d-fab44f901e2c"
